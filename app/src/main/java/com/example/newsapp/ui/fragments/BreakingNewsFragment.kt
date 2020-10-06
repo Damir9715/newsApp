@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newsapp.R
 import com.example.newsapp.adapter.NewsAdapter
@@ -15,19 +16,29 @@ import kotlinx.android.synthetic.main.fragment_breaking_news.*
 class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
     lateinit var viewModel: NewsViewModel
-    lateinit var newsAdapater: NewsAdapter
+    lateinit var newsAdapter: NewsAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as NewsActivity).viewModel
         setupRecyclerView()
 
+        newsAdapter.onClickListener = {
+            val bundle = Bundle().apply {
+                putSerializable("article", it)
+            }
+            findNavController().navigate(
+                R.id.action_breakingNewsFragment_to_articleFragment,
+                bundle
+            )
+        }
+
         viewModel.breakingNews.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
-                        newsAdapater.diff.submitList(newsResponse.articles)
+                        newsAdapter.diff.submitList(newsResponse.articles)
                     }
                 }
                 is Resource.Error -> {
@@ -52,9 +63,9 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     }
 
     private fun setupRecyclerView() {
-        newsAdapater = NewsAdapter()
+        newsAdapter = NewsAdapter()
         rvBreakingNews.apply {
-            adapter = newsAdapater
+            adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
         }
     }
