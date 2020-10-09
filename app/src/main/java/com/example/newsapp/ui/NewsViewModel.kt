@@ -2,6 +2,7 @@ package com.example.newsapp.ui
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import com.example.newsapp.model.Article
 import com.example.newsapp.model.NewsResponse
@@ -23,6 +24,7 @@ class NewsViewModel(val repository: NewsRepository) : ViewModel() {
     init {
         getBreakingNews("us")
     }
+
 
     private fun getBreakingNews(countryCode: String) = viewModelScope.launch {
         breakingNews.postValue(Resource.Loading())
