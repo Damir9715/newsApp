@@ -21,48 +21,48 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = (activity as NewsActivity).viewModel
-        setupRecyclerView()
-
-        newsAdapter.onClickListener = {
-            val bundle = Bundle().apply {
-                putSerializable("article", it)
-            }
-            findNavController().navigate(
-                R.id.action_savedNewsFragment_to_articleFragment,
-                bundle
-            )
-        }
-
-        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return true
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                val article = newsAdapter.diff.currentList[position]
-                viewModel.deleteArticles(article)
-                Snackbar.make(view, "Article was deleted", Snackbar.LENGTH_LONG).apply {
-                    setAction("Undo") {
-                        viewModel.saveArticle(article)
-                    }
-                }.show()
-            }
-        }
-
-        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvSavedNews)
-
-        viewModel.getAllArticles().observe(viewLifecycleOwner) { articles ->
-            newsAdapter.diff.submitList(articles)
-        }
+//        viewModel = (activity as NewsActivity).viewModel
+//        setupRecyclerView()
+//
+//        newsAdapter.onClickListener = {
+//            val bundle = Bundle().apply {
+//                putSerializable("article", it)
+//            }
+//            findNavController().navigate(
+//                R.id.action_savedNewsFragment_to_articleFragment,
+//                bundle
+//            )
+//        }
+//
+//        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+//            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+//            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+//        ) {
+//            override fun onMove(
+//                recyclerView: RecyclerView,
+//                viewHolder: RecyclerView.ViewHolder,
+//                target: RecyclerView.ViewHolder
+//            ): Boolean {
+//                return true
+//            }
+//
+//            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+//                val position = viewHolder.adapterPosition
+//                val article = newsAdapter.diff.currentList[position]
+//                viewModel.deleteArticles(article)
+//                Snackbar.make(view, "Article was deleted", Snackbar.LENGTH_LONG).apply {
+//                    setAction("Undo") {
+//                        viewModel.saveArticle(article)
+//                    }
+//                }.show()
+//            }
+//        }
+//
+//        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(rvSavedNews)
+//
+//        viewModel.getAllArticles().observe(viewLifecycleOwner) { articles ->
+//            newsAdapter.diff.submitList(articles)
+//        }
     }
 
     private fun setupRecyclerView() {

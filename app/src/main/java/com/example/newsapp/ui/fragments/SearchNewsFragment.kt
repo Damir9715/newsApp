@@ -25,51 +25,51 @@ class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = (activity as NewsActivity).viewModel
-        setupRecyclerView()
-
-        newsAdapter.onClickListener = {
-            val bundle = Bundle().apply {
-                putSerializable("article", it)
-            }
-            findNavController().navigate(
-                R.id.action_searchNewsFragment_to_articleFragment,
-                bundle
-            )
-        }
-
-        var job: Job? = null
-        etSearch.addTextChangedListener {
-            job?.cancel()
-            job = MainScope().launch {
-                delay(500)
-                it?.let {
-                    if (it.toString().isNotEmpty()) {
-                        viewModel.searchNews(it.toString())
-                    }
-                }
-            }
-        }
-
-        viewModel.searchNews.observe(viewLifecycleOwner, { response ->
-            when (response) {
-                is Resource.Success -> {
-                    hideProgressBar()
-                    response.data?.let { newsResponse ->
-                        newsAdapter.diff.submitList(newsResponse.articles)
-                    }
-                }
-                is Resource.Error -> {
-                    hideProgressBar()
-                    response.message?.let { message ->
-                        Log.e("SearchNewFragment", "An error occured: $message")
-                    }
-                }
-                is Resource.Loading -> {
-                    showProgressBar()
-                }
-            }
-        })
+//        viewModel = (activity as NewsActivity).viewModel
+//        setupRecyclerView()
+//
+//        newsAdapter.onClickListener = {
+//            val bundle = Bundle().apply {
+//                putSerializable("article", it)
+//            }
+//            findNavController().navigate(
+//                R.id.action_searchNewsFragment_to_articleFragment,
+//                bundle
+//            )
+//        }
+//
+//        var job: Job? = null
+//        etSearch.addTextChangedListener {
+//            job?.cancel()
+//            job = MainScope().launch {
+//                delay(500)
+//                it?.let {
+//                    if (it.toString().isNotEmpty()) {
+//                        viewModel.searchNews(it.toString())
+//                    }
+//                }
+//            }
+//        }
+//
+//        viewModel.searchNews.observe(viewLifecycleOwner, { response ->
+//            when (response) {
+//                is Resource.Success -> {
+//                    hideProgressBar()
+//                    response.data?.let { newsResponse ->
+//                        newsAdapter.diff.submitList(newsResponse.articles)
+//                    }
+//                }
+//                is Resource.Error -> {
+//                    hideProgressBar()
+//                    response.message?.let { message ->
+//                        Log.e("SearchNewFragment", "An error occured: $message")
+//                    }
+//                }
+//                is Resource.Loading -> {
+//                    showProgressBar()
+//                }
+//            }
+//        })
     }
 
     private fun hideProgressBar() {

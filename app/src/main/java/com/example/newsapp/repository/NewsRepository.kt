@@ -1,22 +1,22 @@
 package com.example.newsapp.repository
 
-import android.util.Log
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.example.newsapp.api.Network
+import com.example.newsapp.api.NewsService
 import com.example.newsapp.db.ArticleDatabase
 import com.example.newsapp.model.Article
-import com.example.newsapp.model.NewsResponse
-import retrofit2.Response
+import com.example.newsapp.util.NETWORK_PAGE_SIZE
+import kotlinx.coroutines.flow.Flow
 
-class NewsRepository(val db: ArticleDatabase) {
+class NewsRepository(private val db: ArticleDatabase, private val service: NewsService) {
 
-    suspend fun getBreakingNews(
-        countryCode: String,
-        category: String,
-        pageSize: Int,
-        pageNumber: Int
-    ): Response<NewsResponse> {
-        Log.i("fusroda", "request")
-        return Network.api.getBreakingNews(countryCode, category, pageSize, pageNumber)
+    fun getBreakingNews(): Flow<PagingData<Article>> {
+        return Pager(
+            config = PagingConfig(pageSize = NETWORK_PAGE_SIZE, enablePlaceholders = false),
+            pagingSourceFactory = { ArticlePagingSource(service) }
+        ).flow
     }
 
 

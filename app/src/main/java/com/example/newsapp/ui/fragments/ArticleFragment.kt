@@ -18,17 +18,17 @@ class ArticleFragment : Fragment(R.layout.fragment_article) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = (activity as NewsActivity).viewModel
-
-        val article = args.article
-        webView.apply {
-            webViewClient = WebViewClient()
-            loadUrl(article.url)
-        }
-
-        fab.setOnClickListener {
-            viewModel.saveArticle(article)
-            Snackbar.make(view, "Article was saved", Snackbar.LENGTH_SHORT).show()
-        }
+//        viewModel = (activity as NewsActivity).viewModel
+//
+//        val article = args.article
+//        webView.apply {
+//            webViewClient = WebViewClient()
+//            loadUrl(article.url)
+//        }
+//
+//        fab.setOnClickListener {
+//            viewModel.saveArticle(article)
+//            Snackbar.make(view, "Article was saved", Snackbar.LENGTH_SHORT).show()
+//        }
     }
 }
