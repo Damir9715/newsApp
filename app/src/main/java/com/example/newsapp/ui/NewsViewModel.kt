@@ -13,6 +13,10 @@ import retrofit2.Response
 
 class NewsViewModel(val repository: NewsRepository) : ViewModel() {
 
+    companion object {
+        private const val VISIBLE_THRESHOLD = 5
+    }
+
     val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var breakingNewsPage = 1
     var breakingNewsResponse: NewsResponse? = null
@@ -21,15 +25,20 @@ class NewsViewModel(val repository: NewsRepository) : ViewModel() {
     var searchNewsPage = 1
     var seaarchNewsResponse: NewsResponse? = null
 
+    var isRequestInProgress = false
+
     init {
-        getBreakingNews("us")
+        getBreakingNews("ru")
     }
 
 
     private fun getBreakingNews(countryCode: String) = viewModelScope.launch {
-        breakingNews.postValue(Resource.Loading())
-        val response = repository.getBreakingNews(countryCode, breakingNewsPage)
-        breakingNews.postValue(handleBreakingNewsResponse(response))
+        if (!isRequestInProgress) {
+            breakingNews.postValue(Resource.Loading())
+            isRequestInProgress = true
+            val response = repository.getBreakingNews(countryCode = countryCode, category = "health", pageSize = 10, pageNumber = breakingNewsPage)
+            breakingNews.postValue(handleBreakingNewsResponse(response))
+        }
     }
 
     fun searchNews(searchQuery: String) = viewModelScope.launch {
@@ -44,8 +53,10 @@ class NewsViewModel(val repository: NewsRepository) : ViewModel() {
                 breakingNewsPage++
                 if (breakingNewsResponse == null) {
                     breakingNewsResponse = resultResponse
+                    isRequestInProgress = false
                 } else {
                     breakingNewsResponse?.articles?.addAll(resultResponse.articles)
+                    isRequestInProgress = false
                 }
                 return Resource.Success(breakingNewsResponse ?: resultResponse)
             }
@@ -76,5 +87,11 @@ class NewsViewModel(val repository: NewsRepository) : ViewModel() {
 
     fun deleteArticles(article: Article) = viewModelScope.launch {
         repository.deleteArticle(article)
+    }
+
+    fun listScrolled(visibleItemCount: Int, lastVisibleItem: Int, totalItemCount: Int) {
+        if (totalItemCount <= visibleItemCount + lastVisibleItem + VISIBLE_THRESHOLD) {
+            getBreakingNews("ru")
+        }
     }
 }
