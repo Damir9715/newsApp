@@ -12,9 +12,16 @@ class NewsViewModel(private val repository: NewsRepository) : ViewModel() {
 
     var currentQueryValue: String? = null
     private var currentSearchResult: Flow<PagingData<Article>>? = null
+    private var currentBreakingNewsResult: Flow<PagingData<Article>>? = null
 
     fun getBreakingNews(): Flow<PagingData<Article>> {
-        return repository.getBreakingNews().cachedIn(viewModelScope)
+        var lastResult = currentBreakingNewsResult
+        if (lastResult != null) {
+            return lastResult
+        }
+        lastResult = repository.getBreakingNews().cachedIn(viewModelScope)
+        currentBreakingNewsResult = lastResult
+        return lastResult
     }
 
     fun searchNews(query: String): Flow<PagingData<Article>> {
