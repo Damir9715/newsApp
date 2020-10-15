@@ -1,7 +1,14 @@
 package com.example.newsapp.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.io.Serializable
+
+@Entity(tableName = "articles")
 data class Article(
-    val author: Any,
+    @PrimaryKey(autoGenerate = true)
+    val id: Long? = null,
+    val author: String,
     val content: String,
     val description: String,
     val publishedAt: String,
@@ -9,4 +16,4 @@ data class Article(
     val title: String,
     val url: String,
     val urlToImage: String
-)
+) : Serializable    //TODO make parcelable

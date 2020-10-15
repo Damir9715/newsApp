@@ -7,10 +7,12 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.newsapp.R
 import kotlinx.android.synthetic.main.activity_news.*
 
-class NewsActivity : AppCompatActivity() {
+class NewsActivity : AppCompatActivity(R.layout.activity_news) {
+
+    lateinit var viewModel: NewsViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_news)
 
         bottomNavigation.setupWithNavController(newsNavHostFragment.findNavController())
     }

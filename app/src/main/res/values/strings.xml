@@ -6,4 +6,5 @@
     <string name="search_news_title">Search News</string>
     <string name="saved_news_title">Saved News</string>
     <string name="search_title">Search here...</string>
+    <string name="type_here_to_search">Type here to search</string>
 </resources>
