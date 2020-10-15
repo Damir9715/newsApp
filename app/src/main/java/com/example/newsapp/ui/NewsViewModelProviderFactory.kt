@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.newsapp.repository.NewsRepository
 
 @Suppress("UNCHECKED_CAST")
-class NewsViewModelProviderFactory(val repo: NewsRepository) : ViewModelProvider.Factory {
+class NewsViewModelProviderFactory(private val repo: NewsRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(NewsViewModel::class.java))
             return NewsViewModel(repo) as T

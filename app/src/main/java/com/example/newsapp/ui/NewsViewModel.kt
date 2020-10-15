@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import com.example.newsapp.model.Article
 import com.example.newsapp.repository.NewsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 class NewsViewModel(private val repository: NewsRepository) : ViewModel() {
 
@@ -33,5 +34,15 @@ class NewsViewModel(private val repository: NewsRepository) : ViewModel() {
         val newResult = repository.searchNews(query).cachedIn(viewModelScope)
         currentSearchResult = newResult
         return newResult
+    }
+
+    fun saveArticle(article: Article) = viewModelScope.launch {
+        repository.saveArticle(article)
+    }
+
+    fun getAllArticles() = repository.getAllArticles()
+
+    fun deleteArticle(article: Article) = viewModelScope.launch {
+        repository.deleteArticle(article)
     }
 }

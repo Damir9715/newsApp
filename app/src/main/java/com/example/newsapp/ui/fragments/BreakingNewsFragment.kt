@@ -23,7 +23,6 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     private var viewModel: NewsViewModel? = null
     private val newsAdapter = NewsAdapter()
     private var job: Job? = null
-//    private val model: SharedViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
