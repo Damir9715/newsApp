@@ -2,89 +2,104 @@ package com.example.newsapp.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
-import androidx.core.widget.addTextChangedListener
+import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.paging.LoadState
 import com.example.newsapp.R
 import com.example.newsapp.adapter.NewsAdapter
-import com.example.newsapp.ui.NewsActivity
+import com.example.newsapp.api.Network
+import com.example.newsapp.db.ArticleDatabase
+import com.example.newsapp.repository.NewsRepository
 import com.example.newsapp.ui.NewsViewModel
-import com.example.newsapp.util.Resource
+import com.example.newsapp.ui.NewsViewModelProviderFactory
+import com.example.newsapp.util.LAST_SEARCH_QUERY
+import kotlinx.android.synthetic.main.fragment_breaking_news.*
 import kotlinx.android.synthetic.main.fragment_search_news.*
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class SearchNewsFragment : Fragment(R.layout.fragment_search_news) {
 
-    lateinit var viewModel: NewsViewModel
-    lateinit var newsAdapter: NewsAdapter
+    private var viewModel: NewsViewModel? = null
+    private val newsAdapter = NewsAdapter()
+    private var job: Job? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        viewModel = (activity as NewsActivity).viewModel
-//        setupRecyclerView()
-//
-//        newsAdapter.onClickListener = {
-//            val bundle = Bundle().apply {
-//                putSerializable("article", it)
-//            }
-//            findNavController().navigate(
-//                R.id.action_searchNewsFragment_to_articleFragment,
-//                bundle
-//            )
-//        }
-//
-//        var job: Job? = null
-//        etSearch.addTextChangedListener {
-//            job?.cancel()
-//            job = MainScope().launch {
-//                delay(500)
-//                it?.let {
-//                    if (it.toString().isNotEmpty()) {
-//                        viewModel.searchNews(it.toString())
-//                    }
-//                }
-//            }
-//        }
-//
-//        viewModel.searchNews.observe(viewLifecycleOwner, { response ->
-//            when (response) {
-//                is Resource.Success -> {
-//                    hideProgressBar()
-//                    response.data?.let { newsResponse ->
-//                        newsAdapter.diff.submitList(newsResponse.articles)
-//                    }
-//                }
-//                is Resource.Error -> {
-//                    hideProgressBar()
-//                    response.message?.let { message ->
-//                        Log.e("SearchNewFragment", "An error occured: $message")
-//                    }
-//                }
-//                is Resource.Loading -> {
-//                    showProgressBar()
-//                }
-//            }
-//        })
-    }
-
-    private fun hideProgressBar() {
-        paginationProgressBar.visibility = View.INVISIBLE
-    }
-
-    private fun showProgressBar() {
-        paginationProgressBar.visibility = View.VISIBLE
-    }
-
-    private fun setupRecyclerView() {
-        newsAdapter = NewsAdapter()
-        rvSearchNews.apply {
-            adapter = newsAdapter
-            layoutManager = LinearLayoutManager(activity)
+        val database = ArticleDatabase.getInstance(requireContext())
+        val service = Network.api
+        val repository = NewsRepository(database, service)
+        val viewModelProviderFactory = NewsViewModelProviderFactory(repository)
+        viewModel = activity?.run {
+            ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
         }
+
+        rvSearchNews.adapter = newsAdapter
+
+        newsAdapter.onClickListener = {
+            val bundle = Bundle().apply {
+                putSerializable("article", it)
+            }
+            findNavController().navigate(
+                R.id.action_breakingNewsFragment_to_articleFragment,
+                bundle
+            )
+        }
+
+        var query = viewModel?.currentQueryValue
+        initSearch(query)
+    }
+
+    private fun initSearch(query: String?) {
+
+        etSearch.apply {
+            query?.let {
+                setText(it)
+                updateArticleListFromInput()
+            }
+            setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_GO) {
+                    updateArticleListFromInput()
+                    true
+                } else false
+            }
+            setOnKeyListener { _, keyCode, event ->
+                if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                    updateArticleListFromInput()
+                    true
+                } else false
+            }
+        }
+
+        lifecycleScope.launch {
+            newsAdapter.loadStateFlow
+                .distinctUntilChangedBy { it.refresh }
+                .filter { it.refresh is LoadState.NotLoading }
+                .collect { rvSearchNews.scrollToPosition(0) }
+        }
+    }
+
+    private fun updateArticleListFromInput() {
+        etSearch.text.trim().let { query ->
+            if (query.isNotEmpty()) {
+                job?.cancel()
+                job = lifecycleScope.launch {
+                    viewModel?.searchNews(query.toString())?.collectLatest {
+                        newsAdapter.submitData(it)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel?.currentQueryValue = etSearch.text.trim().toString()
     }
 }

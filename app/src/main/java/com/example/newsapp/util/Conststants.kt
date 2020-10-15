@@ -8,3 +8,4 @@ const val STARTING_PAGE_INDEX = 1
 const val NETWORK_PAGE_SIZE = 10
 const val COUNTRY_CODE = "us"
 const val CATEGORY = "health"
+const val LAST_SEARCH_QUERY = "last_search_query"

@@ -3,7 +3,6 @@ package com.example.newsapp.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.example.newsapp.api.Network
 import com.example.newsapp.api.NewsService
 import com.example.newsapp.db.ArticleDatabase
 import com.example.newsapp.model.Article
@@ -15,13 +14,27 @@ class NewsRepository(private val db: ArticleDatabase, private val service: NewsS
     fun getBreakingNews(): Flow<PagingData<Article>> {
         return Pager(
             config = PagingConfig(pageSize = NETWORK_PAGE_SIZE, enablePlaceholders = false),
-            pagingSourceFactory = { ArticlePagingSource(service) }
+            pagingSourceFactory = {
+                ArticlePagingSource(
+                    service,
+                    ArticlePagingSource.RequestType.BREAKING_NEWS
+                )
+            }
         ).flow
     }
 
-
-    suspend fun searchNews(searchQuery: String, pageNumber: Int) =
-        Network.api.searchForNews(searchQuery, pageNumber)
+    fun searchNews(searchQuery: String): Flow<PagingData<Article>> {
+        return Pager(
+            config = PagingConfig(pageSize = NETWORK_PAGE_SIZE, enablePlaceholders = false),
+            pagingSourceFactory = {
+                ArticlePagingSource(
+                    service,
+                    ArticlePagingSource.RequestType.SEARCH_NEWS,
+                    searchQuery
+                )
+            }
+        ).flow
+    }
 
     suspend fun saveArticle(article: Article) = db.articleDao.upsert(article)
 

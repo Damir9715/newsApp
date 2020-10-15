@@ -20,9 +20,10 @@ import kotlinx.coroutines.launch
 
 class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
-    private lateinit var viewModel: NewsViewModel
+    private var viewModel: NewsViewModel? = null
     private val newsAdapter = NewsAdapter()
     private var job: Job? = null
+//    private val model: SharedViewModel by activityViewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -31,7 +32,10 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         val service = Network.api
         val repository = NewsRepository(database, service)
         val viewModelProviderFactory = NewsViewModelProviderFactory(repository)
-        viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
+        viewModel = activity?.run {
+            ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
+        }
+
         rvBreakingNews.adapter = newsAdapter
 
         newsAdapter.onClickListener = {
@@ -50,7 +54,7 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     private fun getBreakingNews() {
         job?.cancel()
         job = lifecycleScope.launch {
-            viewModel.getBreakingNews().collectLatest {
+            viewModel?.getBreakingNews()?.collectLatest {
                 newsAdapter.submitData(it)
             }
         }

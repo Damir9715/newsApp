@@ -21,8 +21,9 @@ interface NewsService {
 
     @GET("v2/everything")
     suspend fun searchForNews(
-        @Query("q") countryCode: String,
-        @Query("page") pageNumber: Int = 1,
+        @Query("q") query: String,
+        @Query("pageSize") pageSize: Int,
+        @Query("page") pageNumber: Int,
         @Query("apiKey") apiKey: String = API_KEY
-    ): Response<NewsResponse>
+    ): NewsResponse
 }
